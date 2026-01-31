@@ -1,0 +1,12 @@
+package com.aspharier.finora.ui.theme
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Shapes
+import androidx.compose.ui.unit.dp
+
+val FinTrackShapes = Shapes(
+    extraSmall = RoundedCornerShape(4.dp),
+    small = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(12.dp), // Buttons
+    large = RoundedCornerShape(16.dp)   // Cards
+)

@@ -12,3 +12,8 @@ val MintGreen = Color(0xFFABDAC5)   // Tertiary highlights
 // Semantic colors
 val SuccessGreen = Color(0xFF4CAF50)
 val ErrorRed = Color(0xFFE53935)
+
+// Material 3 Expressive Navigation Colors
+val ExpressiveOrange = Color(0xFFD4714A)   // Selected item background
+val ExpressiveBrown = Color(0xFF5C4033)    // Container background
+val ExpressiveIconDark = Color(0xFF3D2A1E) // Icon color on selected

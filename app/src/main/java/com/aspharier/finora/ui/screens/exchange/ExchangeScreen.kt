@@ -113,7 +113,9 @@ fun ExchangeScreen(viewModel: ExchangeViewModel = hiltViewModel()) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        NumericKeypad()
+        NumericKeypad(
+            onKeyPress = viewModel::onKeyPress
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -201,7 +203,9 @@ private fun SwapButton(onClick: () -> Unit) {
 }
 
 @Composable
-private fun NumericKeypad() {
+private fun NumericKeypad(
+    onKeyPress: (String) -> Unit
+) {
     val keys = listOf(
         listOf("1", "2", "3"),
         listOf("4", "5", "6"),
@@ -215,7 +219,10 @@ private fun NumericKeypad() {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                row.forEach { key -> KeypadKey(key) }
+                row.forEach { key ->
+                    KeypadKey(
+                        key,
+                        onClick = { onKeyPress(key) }) }
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -223,7 +230,10 @@ private fun NumericKeypad() {
 }
 
 @Composable
-private fun KeypadKey(label: String) {
+private fun KeypadKey(
+    label: String,
+    onClick: () -> Unit
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val pressed = remember { mutableStateOf(false) }
     
@@ -250,8 +260,9 @@ private fun KeypadKey(label: String) {
             }
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(bounded = true)
-            ) {},
+                indication = ripple(bounded = true),
+                onClick = onClick
+            ),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {

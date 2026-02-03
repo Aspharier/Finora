@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,7 +27,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.CallMade
 import androidx.compose.material.icons.automirrored.outlined.CallReceived
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.Payment
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.Card
@@ -58,12 +58,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.aspharier.finora.ui.theme.DarkSurface
 import com.aspharier.finora.ui.theme.NeonGreen
-import com.aspharier.finora.ui.theme.PureWhite
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeScreen(
+        viewModel: HomeViewModel = hiltViewModel(),
+        onToggleTheme: () -> Unit = {},
+        isDarkTheme: Boolean = true
+) {
         val state by viewModel.state.collectAsState()
 
         LazyColumn(
@@ -72,7 +74,13 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                 verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
                 // Greeting Header
-                item { GreetingHeader(state.userName) }
+                item {
+                        GreetingHeader(
+                                userName = state.userName,
+                                onToggleTheme = onToggleTheme,
+                                isDarkTheme = isDarkTheme
+                        )
+                }
 
                 // Balance Card
                 item { BalanceCard(state) }
@@ -97,7 +105,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
 }
 
 @Composable
-private fun GreetingHeader(userName: String) {
+private fun GreetingHeader(userName: String, onToggleTheme: () -> Unit, isDarkTheme: Boolean) {
         Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -131,7 +139,7 @@ private fun GreetingHeader(userName: String) {
                                                         fontWeight = FontWeight.Bold,
                                                         fontSize = 20.sp
                                                 ),
-                                        color = PureWhite
+                                        color = MaterialTheme.colorScheme.onPrimary
                                 )
                         }
 
@@ -144,51 +152,36 @@ private fun GreetingHeader(userName: String) {
                                                 MaterialTheme.typography.bodyLarge.copy(
                                                         fontWeight = FontWeight.SemiBold
                                                 ),
-                                        color = PureWhite
+                                        color = MaterialTheme.colorScheme.onBackground
                                 )
                                 Text(
                                         text = "Welcome Back",
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = PureWhite.copy(alpha = 0.6f)
+                                        color =
+                                                MaterialTheme.colorScheme.onBackground.copy(
+                                                        alpha = 0.6f
+                                                )
                                 )
                         }
                 }
 
-                // Notification Bell with Badge
-                Box(contentAlignment = Alignment.TopEnd) {
-                        Box(
-                                modifier =
-                                        Modifier.size(44.dp)
-                                                .clip(CircleShape)
-                                                .background(DarkSurface),
-                                contentAlignment = Alignment.Center
-                        ) {
-                                Icon(
-                                        imageVector = Icons.Outlined.Notifications,
-                                        contentDescription = "Notifications",
-                                        tint = PureWhite,
-                                        modifier = Modifier.size(22.dp)
-                                )
-                        }
-                        // Badge
-                        Box(
-                                modifier =
-                                        Modifier.size(18.dp)
-                                                .offset(x = 2.dp, y = (-2).dp)
-                                                .clip(CircleShape)
-                                                .background(NeonGreen),
-                                contentAlignment = Alignment.Center
-                        ) {
-                                Text(
-                                        text = "2",
-                                        style =
-                                                MaterialTheme.typography.labelMedium.copy(
-                                                        fontSize = 10.sp,
-                                                        fontWeight = FontWeight.Bold
-                                                ),
-                                        color = Color.Black
-                                )
-                        }
+                // Theme Toggle Button
+                Box(
+                        modifier =
+                                Modifier.size(44.dp)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.surface)
+                                        .clickable { onToggleTheme() },
+                        contentAlignment = Alignment.Center
+                ) {
+                        Icon(
+                                imageVector =
+                                        if (isDarkTheme) Icons.Outlined.LightMode
+                                        else Icons.Outlined.DarkMode,
+                                contentDescription = "Toggle Theme",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(22.dp)
+                        )
                 }
         }
 }
@@ -218,7 +211,8 @@ private fun BalanceCard(state: HomeState) {
                         Modifier.fillMaxWidth()
                                 .graphicsLayer(alpha = alpha, translationY = translateY),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = DarkSurface),
+                colors =
+                        CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(8.dp)
         ) {
                 Column(modifier = Modifier.padding(20.dp)) {
@@ -231,7 +225,10 @@ private fun BalanceCard(state: HomeState) {
                                 Text(
                                         text = "My Balance",
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = PureWhite.copy(alpha = 0.7f)
+                                        color =
+                                                MaterialTheme.colorScheme.onSurface.copy(
+                                                        alpha = 0.7f
+                                                )
                                 )
 
                                 Row(
@@ -244,13 +241,19 @@ private fun BalanceCard(state: HomeState) {
                                         Text(
                                                 text = "Add Card",
                                                 style = MaterialTheme.typography.labelMedium,
-                                                color = PureWhite.copy(alpha = 0.7f)
+                                                color =
+                                                        MaterialTheme.colorScheme.onSurface.copy(
+                                                                alpha = 0.7f
+                                                        )
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Icon(
                                                 imageVector = Icons.Outlined.Add,
                                                 contentDescription = "Add Card",
-                                                tint = PureWhite.copy(alpha = 0.7f),
+                                                tint =
+                                                        MaterialTheme.colorScheme.onSurface.copy(
+                                                                alpha = 0.7f
+                                                        ),
                                                 modifier = Modifier.size(16.dp)
                                         )
                                 }
@@ -267,7 +270,7 @@ private fun BalanceCard(state: HomeState) {
                                                 fontSize = 36.sp,
                                                 fontWeight = FontWeight.Bold
                                         ),
-                                color = PureWhite
+                                color = MaterialTheme.colorScheme.onSurface
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -307,10 +310,13 @@ private fun ActionItem(label: String, icon: ImageVector) {
                         modifier =
                                 Modifier.size(56.dp)
                                         .clip(RoundedCornerShape(16.dp))
-                                        .background(DarkSurface)
+                                        .background(MaterialTheme.colorScheme.surface)
                                         .border(
                                                 width = 1.dp,
-                                                color = PureWhite.copy(alpha = 0.1f),
+                                                color =
+                                                        MaterialTheme.colorScheme.onSurface.copy(
+                                                                alpha = 0.1f
+                                                        ),
                                                 shape = RoundedCornerShape(16.dp)
                                         )
                                         .clickable(
@@ -332,7 +338,7 @@ private fun ActionItem(label: String, icon: ImageVector) {
                 Text(
                         text = label,
                         style = MaterialTheme.typography.labelMedium,
-                        color = PureWhite.copy(alpha = 0.8f)
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
                 )
         }
 }
@@ -358,7 +364,10 @@ private fun BudgetProgress(state: HomeState) {
                                 Text(
                                         text = "Left to spend",
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = PureWhite.copy(alpha = 0.6f)
+                                        color =
+                                                MaterialTheme.colorScheme.onBackground.copy(
+                                                        alpha = 0.6f
+                                                )
                                 )
                                 Text(
                                         text =
@@ -368,7 +377,7 @@ private fun BudgetProgress(state: HomeState) {
                                                         fontWeight = FontWeight.SemiBold,
                                                         fontSize = 18.sp
                                                 ),
-                                        color = PureWhite
+                                        color = MaterialTheme.colorScheme.onBackground
                                 )
                         }
 
@@ -376,7 +385,10 @@ private fun BudgetProgress(state: HomeState) {
                                 Text(
                                         text = "Monthly budget",
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = PureWhite.copy(alpha = 0.6f)
+                                        color =
+                                                MaterialTheme.colorScheme.onBackground.copy(
+                                                        alpha = 0.6f
+                                                )
                                 )
                                 Text(
                                         text =
@@ -386,7 +398,7 @@ private fun BudgetProgress(state: HomeState) {
                                                         fontWeight = FontWeight.SemiBold,
                                                         fontSize = 18.sp
                                                 ),
-                                        color = PureWhite
+                                        color = MaterialTheme.colorScheme.onBackground
                                 )
                         }
                 }
@@ -399,7 +411,7 @@ private fun BudgetProgress(state: HomeState) {
                         modifier =
                                 Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
                         color = NeonGreen,
-                        trackColor = DarkSurface
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant
                 )
         }
 }
@@ -419,12 +431,12 @@ private fun RecentTransactionAvatars(contacts: List<ContactAvatar>) {
                                         MaterialTheme.typography.bodyLarge.copy(
                                                 fontWeight = FontWeight.SemiBold
                                         ),
-                                color = PureWhite
+                                color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                                 text = "See all",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = PureWhite.copy(alpha = 0.6f),
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                                 modifier = Modifier.clickable {}
                         )
                 }
@@ -457,7 +469,10 @@ private fun ContactAvatarItem(contact: ContactAvatar) {
                                         )
                                         .border(
                                                 width = 2.dp,
-                                                color = PureWhite.copy(alpha = 0.2f),
+                                                color =
+                                                        MaterialTheme.colorScheme.onSurface.copy(
+                                                                alpha = 0.2f
+                                                        ),
                                                 shape = CircleShape
                                         ),
                         contentAlignment = Alignment.Center
@@ -468,7 +483,7 @@ private fun ContactAvatarItem(contact: ContactAvatar) {
                                         MaterialTheme.typography.bodyLarge.copy(
                                                 fontWeight = FontWeight.SemiBold
                                         ),
-                                color = PureWhite
+                                color = MaterialTheme.colorScheme.onSurface
                         )
                 }
 
@@ -477,7 +492,7 @@ private fun ContactAvatarItem(contact: ContactAvatar) {
                 Text(
                         text = contact.name,
                         style = MaterialTheme.typography.labelMedium,
-                        color = PureWhite.copy(alpha = 0.8f)
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
                 )
         }
 }
@@ -500,12 +515,12 @@ private fun TransactionsSection(
                                         MaterialTheme.typography.bodyLarge.copy(
                                                 fontWeight = FontWeight.SemiBold
                                         ),
-                                color = PureWhite
+                                color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                                 text = "See All",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = PureWhite.copy(alpha = 0.6f),
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                                 modifier = Modifier.clickable {}
                         )
                 }
@@ -548,14 +563,20 @@ private fun TransactionFilterTabs(selectedFilter: TransactionFilter) {
                                 },
                                 colors =
                                         FilterChipDefaults.filterChipColors(
-                                                containerColor = DarkSurface,
-                                                labelColor = PureWhite.copy(alpha = 0.7f),
+                                                containerColor = MaterialTheme.colorScheme.surface,
+                                                labelColor =
+                                                        MaterialTheme.colorScheme.onSurface.copy(
+                                                                alpha = 0.7f
+                                                        ),
                                                 selectedContainerColor = NeonGreen,
                                                 selectedLabelColor = Color.Black
                                         ),
                                 border =
                                         FilterChipDefaults.filterChipBorder(
-                                                borderColor = PureWhite.copy(alpha = 0.1f),
+                                                borderColor =
+                                                        MaterialTheme.colorScheme.onSurface.copy(
+                                                                alpha = 0.1f
+                                                        ),
                                                 selectedBorderColor = NeonGreen,
                                                 enabled = true,
                                                 selected = filter == selectedFilter
@@ -571,7 +592,7 @@ private fun TransactionListItem(transaction: TransactionUiModel) {
                 modifier =
                         Modifier.fillMaxWidth()
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(DarkSurface)
+                                .background(MaterialTheme.colorScheme.surface)
                                 .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
         ) {
@@ -597,7 +618,7 @@ private fun TransactionListItem(transaction: TransactionUiModel) {
                                         MaterialTheme.typography.bodyLarge.copy(
                                                 fontWeight = FontWeight.SemiBold
                                         ),
-                                color = PureWhite
+                                color = MaterialTheme.colorScheme.onSurface
                         )
                 }
 
@@ -611,12 +632,12 @@ private fun TransactionListItem(transaction: TransactionUiModel) {
                                         MaterialTheme.typography.bodyLarge.copy(
                                                 fontWeight = FontWeight.Medium
                                         ),
-                                color = PureWhite
+                                color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                                 text = transaction.timestamp,
                                 style = MaterialTheme.typography.labelMedium,
-                                color = PureWhite.copy(alpha = 0.6f)
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
                 }
 
@@ -630,12 +651,14 @@ private fun TransactionListItem(transaction: TransactionUiModel) {
                                         MaterialTheme.typography.bodyLarge.copy(
                                                 fontWeight = FontWeight.SemiBold
                                         ),
-                                color = if (transaction.isCredit) NeonGreen else PureWhite
+                                color =
+                                        if (transaction.isCredit) NeonGreen
+                                        else MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                                 text = transaction.category,
                                 style = MaterialTheme.typography.labelMedium,
-                                color = PureWhite.copy(alpha = 0.6f)
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
                 }
         }

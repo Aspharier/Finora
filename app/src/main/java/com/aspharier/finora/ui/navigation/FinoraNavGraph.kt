@@ -16,7 +16,12 @@ import com.aspharier.finora.ui.screens.statistics.StatisticsScreen
 private const val ANIMATION_DURATION = 350
 
 @Composable
-fun FinoraNavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
+fun FinoraNavGraph(
+        navController: NavHostController,
+        modifier: Modifier = Modifier,
+        onToggleTheme: () -> Unit = {},
+        isDarkTheme: Boolean = true
+) {
     NavHost(
             navController = navController,
             startDestination = Routes.HOME,
@@ -46,8 +51,10 @@ fun FinoraNavGraph(navController: NavHostController, modifier: Modifier = Modifi
                 ) + fadeOut(animationSpec = tween(ANIMATION_DURATION))
             }
     ) {
-        composable(Routes.HOME) { HomeScreen() }
-        composable(Routes.EXCHANGE) { ExchangeScreen() }
+        composable(Routes.HOME) {
+            HomeScreen(onToggleTheme = onToggleTheme, isDarkTheme = isDarkTheme)
+        }
+        composable(Routes.EXCHANGE) { ExchangeScreen(isDarkTheme = isDarkTheme) }
         composable(Routes.STATISTICS) { StatisticsScreen() }
     }
 }

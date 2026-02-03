@@ -40,139 +40,146 @@ import com.aspharier.finora.ui.theme.PureWhite
 
 @Composable
 fun FinoraBottomBar(navController: NavController) {
-    val items = listOf(BottomNavItem.Home, BottomNavItem.Exchange, BottomNavItem.Statistics)
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+        val items = listOf(BottomNavItem.Home, BottomNavItem.Exchange, BottomNavItem.Statistics)
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute = navBackStackEntry?.destination?.route
 
-    Box(
-            modifier =
-                    Modifier.fillMaxWidth()
-                            .windowInsetsPadding(WindowInsets.navigationBars)
-                            .padding(bottom = 12.dp),
-            contentAlignment = Alignment.Center
-    ) {
-        // Floating pill container
-        Row(
+        Box(
                 modifier =
-                        Modifier.clip(RoundedCornerShape(32.dp))
-                                .background(DarkSurface)
-                                .padding(horizontal = 8.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
+                        Modifier.fillMaxWidth()
+                                .windowInsetsPadding(WindowInsets.navigationBars)
+                                .padding(bottom = 12.dp),
+                contentAlignment = Alignment.Center
         ) {
-            items.forEach { item ->
-                val selected = currentRoute == item.route
+                // Floating pill container
+                Row(
+                        modifier =
+                                Modifier.clip(RoundedCornerShape(32.dp))
+                                        .background(DarkSurface.copy(alpha = 0.85f))
+                                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                ) {
+                        items.forEach { item ->
+                                val selected = currentRoute == item.route
 
-                ExpressiveNavItem(
-                        item = item,
-                        selected = selected,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(Routes.HOME) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
+                                ExpressiveNavItem(
+                                        item = item,
+                                        selected = selected,
+                                        onClick = {
+                                                navController.navigate(item.route) {
+                                                        popUpTo(Routes.HOME) { saveState = true }
+                                                        launchSingleTop = true
+                                                        restoreState = true
+                                                }
+                                        }
+                                )
                         }
-                )
-            }
+                }
         }
-    }
 }
 
 @Composable
 private fun ExpressiveNavItem(item: BottomNavItem, selected: Boolean, onClick: () -> Unit) {
-    val interactionSource = remember { MutableInteractionSource() }
+        val interactionSource = remember { MutableInteractionSource() }
 
-    // Animate padding for smooth size transition
-    val horizontalPadding by
-            animateDpAsState(
-                    targetValue = if (selected) 16.dp else 12.dp,
-                    animationSpec =
-                            spring(
-                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                    stiffness = Spring.StiffnessLow
-                            ),
-                    label = "horizontalPadding"
-            )
-
-    val verticalPadding by
-            animateDpAsState(
-                    targetValue = if (selected) 10.dp else 10.dp,
-                    animationSpec =
-                            spring(
-                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                    stiffness = Spring.StiffnessLow
-                            ),
-                    label = "verticalPadding"
-            )
-
-    Box(
-            modifier =
-                    Modifier.clip(RoundedCornerShape(24.dp))
-                            .background(if (selected) NeonGreen else Color.Transparent)
-                            .clickable(
-                                    interactionSource = interactionSource,
-                                    indication = null,
-                                    onClick = onClick
-                            )
-                            .padding(horizontal = horizontalPadding, vertical = verticalPadding),
-            contentAlignment = Alignment.Center
-    ) {
-        Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                    imageVector = item.icon,
-                    contentDescription = item.label,
-                    modifier = Modifier.size(22.dp),
-                    tint = if (selected) DarkSurface else PureWhite.copy(alpha = 0.7f)
-            )
-
-            // Animated label - only visible when selected with smooth expand/shrink
-            AnimatedVisibility(
-                    visible = selected,
-                    enter =
-                            expandHorizontally(
-                                    animationSpec =
-                                            spring(
-                                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                                    stiffness = Spring.StiffnessMedium
-                                            ),
-                                    expandFrom = Alignment.Start
-                            ) +
-                                    fadeIn(
-                                            animationSpec =
-                                                    spring(
-                                                            dampingRatio =
-                                                                    Spring.DampingRatioNoBouncy,
-                                                            stiffness = Spring.StiffnessMedium
-                                                    )
-                                    ),
-                    exit =
-                            shrinkHorizontally(
-                                    animationSpec =
-                                            spring(
-                                                    dampingRatio = Spring.DampingRatioNoBouncy,
-                                                    stiffness = Spring.StiffnessHigh
-                                            ),
-                                    shrinkTowards = Alignment.Start
-                            ) +
-                                    fadeOut(
-                                            animationSpec =
-                                                    spring(
-                                                            dampingRatio =
-                                                                    Spring.DampingRatioNoBouncy,
-                                                            stiffness = Spring.StiffnessHigh
-                                                    )
-                                    )
-            ) {
-                Text(
-                        text = item.label,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = DarkSurface
+        // Animate padding for smooth size transition
+        val horizontalPadding by
+                animateDpAsState(
+                        targetValue = if (selected) 16.dp else 12.dp,
+                        animationSpec =
+                                spring(
+                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                        stiffness = Spring.StiffnessLow
+                                ),
+                        label = "horizontalPadding"
                 )
-            }
+
+        val verticalPadding by
+                animateDpAsState(
+                        targetValue = if (selected) 10.dp else 10.dp,
+                        animationSpec =
+                                spring(
+                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                        stiffness = Spring.StiffnessLow
+                                ),
+                        label = "verticalPadding"
+                )
+
+        Box(
+                modifier =
+                        Modifier.clip(RoundedCornerShape(24.dp))
+                                .background(if (selected) NeonGreen else Color.Transparent)
+                                .clickable(
+                                        interactionSource = interactionSource,
+                                        indication = null,
+                                        onClick = onClick
+                                )
+                                .padding(
+                                        horizontal = horizontalPadding,
+                                        vertical = verticalPadding
+                                ),
+                contentAlignment = Alignment.Center
+        ) {
+                Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                        Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.label,
+                                modifier = Modifier.size(22.dp),
+                                tint = if (selected) DarkSurface else PureWhite.copy(alpha = 0.7f)
+                        )
+
+                        // Animated label - only visible when selected with smooth expand/shrink
+                        AnimatedVisibility(
+                                visible = selected,
+                                enter =
+                                        expandHorizontally(
+                                                animationSpec =
+                                                        spring(
+                                                                dampingRatio =
+                                                                        Spring.DampingRatioMediumBouncy,
+                                                                stiffness = Spring.StiffnessMedium
+                                                        ),
+                                                expandFrom = Alignment.Start
+                                        ) +
+                                                fadeIn(
+                                                        animationSpec =
+                                                                spring(
+                                                                        dampingRatio =
+                                                                                Spring.DampingRatioNoBouncy,
+                                                                        stiffness =
+                                                                                Spring.StiffnessMedium
+                                                                )
+                                                ),
+                                exit =
+                                        shrinkHorizontally(
+                                                animationSpec =
+                                                        spring(
+                                                                dampingRatio =
+                                                                        Spring.DampingRatioNoBouncy,
+                                                                stiffness = Spring.StiffnessHigh
+                                                        ),
+                                                shrinkTowards = Alignment.Start
+                                        ) +
+                                                fadeOut(
+                                                        animationSpec =
+                                                                spring(
+                                                                        dampingRatio =
+                                                                                Spring.DampingRatioNoBouncy,
+                                                                        stiffness =
+                                                                                Spring.StiffnessHigh
+                                                                )
+                                                )
+                        ) {
+                                Text(
+                                        text = item.label,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = DarkSurface
+                                )
+                        }
+                }
         }
-    }
 }

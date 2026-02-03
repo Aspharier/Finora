@@ -50,13 +50,34 @@ class ExchangeViewModel @Inject constructor(private val repository: ExchangeRate
 
     fun refreshRatesSafely() {
         viewModelScope.launch {
+            _state.value = _state.value.copy(
+                status = ExchangeStatus.LOADING,
+                errorMessage = null
+            )
             try {
                 repository.getRates()
-                _state.value = _state.value.copy(lastUpdated = "Live rate")
+                _state.value = _state.value.copy(
+                    status = ExchangeStatus.SUCCESS,
+                    lastUpdated = "Live rate"
+                )
             } catch (e: RateLimitException) {
-                _state.value = _state.value.copy(lastUpdated = "Using cached rate")
+                _state.value = _state.value.copy(
+                    status = ExchangeStatus.ERROR,
+                    lastUpdated = "Using cached rate",
+                    errorMessage = "Unable to refresh rates"
+                )
             }
         }
+    }
+
+    fun onFromCurrencySelected(currency: CurrencyUiModel) {
+        _state.value = _state.value.copy(fromCurrency = currency)
+        recalculate(_state.value.fromAmount)
+    }
+
+    fun onToCurrencySelected(currency: CurrencyUiModel) {
+        _state.value = _state.value.copy(toCurrency = currency)
+        recalculate(_state.value.fromAmount)
     }
 
     @SuppressLint("DefaultLocale")

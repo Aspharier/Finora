@@ -11,26 +11,12 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.TrendingDown
-import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -38,72 +24,73 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.aspharier.finora.domain.model.Category
+import com.aspharier.finora.domain.model.CategorySummary
 import com.aspharier.finora.ui.theme.NeonGreen
 
 @Composable
 fun StatisticsScreen(viewModel: StatisticsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 24.dp)) {
-        ModeToggle(state.mode, viewModel::toggleMode)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Statistics",
+            style = MaterialTheme.typography.displayMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        TimeRangeSelector(state.selectedRange, viewModel::onTimeRangeSelected)
 
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Total Spent Header
         TotalAmountHeader(state)
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        TimeRangeSelector(state.timeRange, viewModel::changeRange)
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        BarChart(state.bars)
+        // Chart
+        if (state.chartData.isNotEmpty()) {
+            BarChart(state.chartData)
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No data available",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        ScheduledPaymentsPreview()
-    }
-}
-
-@Composable
-private fun ModeToggle(selected: StatsMode, onSelect: (StatsMode) -> Unit) {
-    Box(
-            modifier =
-                    Modifier.fillMaxWidth()
-                            .height(56.dp)
-                            .clip(RoundedCornerShape(28.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-    ) {
-        Row(modifier = Modifier.fillMaxSize()) {
-            StatsMode.values().forEach { mode ->
-                val isSelected = selected == mode
-                Box(
-                        modifier =
-                                Modifier.weight(1f)
-                                        .fillMaxHeight()
-                                        .padding(4.dp)
-                                        .clip(RoundedCornerShape(24.dp))
-                                        .background(
-                                                if (isSelected) MaterialTheme.colorScheme.surface
-                                                else Color.Transparent
-                                        )
-                                        .clickable { onSelect(mode) },
-                        contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                            text = mode.name.lowercase().replaceFirstChar { it.uppercase() },
-                            color =
-                                    if (isSelected) MaterialTheme.colorScheme.onSurface
-                                    else
-                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                                    alpha = 0.6f
-                                            ),
-                            style = MaterialTheme.typography.titleMedium
-                    )
-                }
+        // Category Breakdown
+        Text(
+            text = "Category Breakdown",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(state.categoryBreakdown) { summary ->
+                CategoryBreakdownItem(summary)
             }
         }
     }
@@ -111,73 +98,84 @@ private fun ModeToggle(selected: StatsMode, onSelect: (StatsMode) -> Unit) {
 
 @Composable
 private fun TotalAmountHeader(state: StatisticsState) {
-
-    AnimatedContent(
-            targetState = state.totalAmount,
+    Column {
+        Text(
+            text = "Total Spent",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        AnimatedContent(
+            targetState = state.totalSpent,
             transitionSpec = { fadeIn(tween(300)) togetherWith fadeOut(tween(300)) },
             label = "amountChange"
-    ) { amount ->
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        ) { amount ->
             Text(
-                    text = amount,
-                    style = MaterialTheme.typography.displayLarge,
-                    color = MaterialTheme.colorScheme.onBackground
+                text = "₹ ${String.format("%.2f", amount)}",
+                style = MaterialTheme.typography.displayLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Bold
             )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            val scale by
-                    animateFloatAsState(
-                            targetValue = 1f,
-                            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-                            label = "trendScale"
-                    )
-
-            Icon(
-                    imageVector =
-                            if (state.isPositiveTrend) Icons.Default.TrendingUp
-                            else Icons.Default.TrendingDown,
-                    contentDescription = null,
-                    tint =
-                            if (state.isPositiveTrend) NeonGreen
-                            else MaterialTheme.colorScheme.error,
-                    modifier =
-                            Modifier.graphicsLayer {
-                                scaleX = scale
-                                scaleY = scale
-                            }
+        }
+        
+        if (state.budgetStatus != null) {
+            val budget = state.budgetStatus
+            Spacer(modifier = Modifier.height(4.dp))
+            LinearProgressIndicator(
+                progress = { budget.percentageUsed / 100f },
+                modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
+                color = when {
+                    budget.percentageUsed > 100 -> MaterialTheme.colorScheme.error
+                    budget.percentageUsed > 80 -> Color(0xFFFFB74D) // Warning Orange
+                    else -> NeonGreen
+                },
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "${String.format("%.1f", budget.percentageUsed)}% of Budget",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "₹ ${String.format("%.2f", budget.remaining)} remaining",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
 
 @Composable
 private fun TimeRangeSelector(selected: TimeRange, onSelect: (TimeRange) -> Unit) {
-    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-        TimeRange.values().forEach { range ->
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        TimeRange.entries.forEach { range ->
             val isSelected = selected == range
             Box(
-                    modifier =
-                            Modifier.width(60.dp)
-                                    .height(60.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .border(
-                                            width = if (isSelected) 0.dp else 1.dp,
-                                            color =
-                                                    if (isSelected) Color.Transparent
-                                                    else MaterialTheme.colorScheme.outlineVariant,
-                                            shape = RoundedCornerShape(16.dp)
-                                    )
-                                    .background(if (isSelected) NeonGreen else Color.Transparent)
-                                    .clickable { onSelect(range) },
-                    contentAlignment = Alignment.Center
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 4.dp)
+                    .height(40.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(if (isSelected) NeonGreen else Color.Transparent)
+                    .border(
+                        width = 1.dp,
+                        color = if (isSelected) Color.Transparent else MaterialTheme.colorScheme.outline,
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .clickable { onSelect(range) },
+                contentAlignment = Alignment.Center
             ) {
                 Text(
-                        text = range.name.first().toString(),
-                        style = MaterialTheme.typography.titleMedium,
-                        color =
-                                if (isSelected) Color.Black
-                                else MaterialTheme.colorScheme.onSurfaceVariant
+                    text = range.label,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (isSelected) Color.Black else MaterialTheme.colorScheme.onSurface
                 )
             }
         }
@@ -185,49 +183,43 @@ private fun TimeRangeSelector(selected: TimeRange, onSelect: (TimeRange) -> Unit
 }
 
 @Composable
-private fun BarChart(bars: List<BarData>) {
-    val max = bars.maxOf { it.value }
-    val maxIndex = bars.indexOfFirst { it.value == max }
-
+private fun BarChart(data: List<Pair<String, Double>>) {
+    val max = data.maxOfOrNull { it.second } ?: 1.0
+    
     Row(
-            modifier = Modifier.fillMaxWidth().height(200.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.Bottom
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.Bottom
     ) {
-        bars.forEachIndexed { index, bar ->
-            val isMaxBar = index == maxIndex
-            val animatedHeight by
-                    animateFloatAsState(
-                            targetValue = if (bar.value > 0) bar.value / max else 0.05f,
-                            animationSpec =
-                                    spring(
-                                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                                            stiffness = Spring.StiffnessLow
-                                    ),
-                            label = "barGrow_$index"
-                    )
-
+        data.forEach { (label, value) ->
+            val animatedHeight by animateFloatAsState(
+                targetValue = (value / max).toFloat().coerceIn(0.05f, 1f),
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
+                ),
+                label = "barHeight"
+            )
+            
             Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
-                        modifier =
-                                Modifier.width(32.dp)
-                                        .fillMaxHeight(animatedHeight.coerceIn(0.05f, 1f))
-                                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                                        .background(
-                                                if (isMaxBar) NeonGreen
-                                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-                                        )
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .fillMaxHeight(animatedHeight)
+                        .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                        .background(NeonGreen)
                 )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                        text = bar.label,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -235,24 +227,47 @@ private fun BarChart(bars: List<BarData>) {
 }
 
 @Composable
-private fun ScheduledPaymentsPreview() {
-    Column {
-        Text(text = "Scheduled Payments", style = MaterialTheme.typography.headlineMedium)
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Netflix", style = MaterialTheme.typography.bodyLarge)
-                Spacer(modifier = Modifier.weight(1f))
-                Text("₹ 499", color = MaterialTheme.colorScheme.error)
-            }
+private fun CategoryBreakdownItem(summary: CategorySummary) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            .padding(12.dp)
+    ) {
+        Icon(
+            imageVector = Category.getIconForName(summary.category.iconName),
+            contentDescription = null,
+            tint = Color(android.graphics.Color.parseColor(summary.category.colorHex)),
+            modifier = Modifier
+                .size(40.dp)
+                .background(
+                    Color(android.graphics.Color.parseColor(summary.category.colorHex)).copy(alpha = 0.2f),
+                    CircleShape
+                )
+                .padding(8.dp)
+        )
+        
+        Spacer(modifier = Modifier.width(12.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = summary.category.name,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = "${String.format("%.1f", summary.percentage)}%",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
+        
+        Text(
+            text = "₹ ${String.format("%.2f", summary.amount)}",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
     }
 }

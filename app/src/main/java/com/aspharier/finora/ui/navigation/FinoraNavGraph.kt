@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.aspharier.finora.ui.screens.exchange.ExchangeScreen
+import com.aspharier.finora.ui.screens.expense.AddExpenseScreen
 import com.aspharier.finora.ui.screens.home.HomeScreen
 import com.aspharier.finora.ui.screens.statistics.StatisticsScreen
 
@@ -54,7 +54,9 @@ fun FinoraNavGraph(
         composable(Routes.HOME) {
             HomeScreen(onToggleTheme = onToggleTheme, isDarkTheme = isDarkTheme)
         }
-        composable(Routes.EXCHANGE) { ExchangeScreen(isDarkTheme = isDarkTheme) }
+        composable(Routes.ADD_EXPENSE) {
+            AddExpenseScreen(onNavigateBack = { navController.popBackStack() })
+        }
         composable(Routes.STATISTICS) { StatisticsScreen() }
     }
 }

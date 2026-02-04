@@ -8,7 +8,6 @@ import com.aspharier.finora.data.local.entity.ExchangeRateEntity
 
 @Dao
 interface ExchangeRateDao {
-
     @Query("SELECT * FROM exchange_rates")
     suspend fun getAllRates(): List<ExchangeRateEntity>
 

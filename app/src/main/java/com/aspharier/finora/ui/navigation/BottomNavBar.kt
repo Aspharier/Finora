@@ -1,9 +1,13 @@
 package com.aspharier.finora.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -14,21 +18,27 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -38,12 +48,15 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.aspharier.finora.ui.theme.DarkSurface
 import com.aspharier.finora.ui.theme.NeonGreen
 import com.aspharier.finora.ui.theme.PureWhite
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun FinoraBottomBar(navController: NavController) {
         val items = listOf(BottomNavItem.Home, BottomNavItem.Exchange, BottomNavItem.Statistics)
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
+        val scope = rememberCoroutineScope()
 
         Box(
                 modifier =
@@ -68,10 +81,19 @@ fun FinoraBottomBar(navController: NavController) {
                                         item = item,
                                         selected = selected,
                                         onClick = {
-                                                navController.navigate(item.route) {
-                                                        popUpTo(Routes.HOME) { saveState = true }
-                                                        launchSingleTop = true
-                                                        restoreState = true
+                                                scope.launch {
+                                                        if (item.route == Routes.ADD_EXPENSE) {
+                                                                delay(
+                                                                        120
+                                                                ) // Slight delay for smoothness
+                                                        }
+                                                        navController.navigate(item.route) {
+                                                                popUpTo(Routes.HOME) {
+                                                                        saveState = true
+                                                                }
+                                                                launchSingleTop = true
+                                                                restoreState = true
+                                                        }
                                                 }
                                         }
                                 )
@@ -80,109 +102,184 @@ fun FinoraBottomBar(navController: NavController) {
         }
 }
 
+//@Composable
+//private fun ExpressiveNavItem(
+//    item: BottomNavItem,
+//    selected: Boolean,
+//    onClick: () -> Unit
+//) {
+//        val interactionSource = remember { MutableInteractionSource() }
+//
+//        // Animate padding for smooth size transition
+//        val horizontalPadding by
+//                animateDpAsState(
+//                        targetValue = if (selected) 20.dp else 16.dp,
+//                        animationSpec =
+//                                spring(
+//                                        dampingRatio = Spring.DampingRatioLowBouncy,
+//                                        stiffness = Spring.StiffnessLow
+//                                ),
+//                        label = "horizontalPadding"
+//                )
+//
+//        val verticalPadding by
+//                animateDpAsState(
+//                        targetValue = if (selected) 10.dp else 10.dp,
+//                        animationSpec =
+//                                spring(
+//                                        dampingRatio = Spring.DampingRatioLowBouncy,
+//                                        stiffness = Spring.StiffnessLow
+//                                ),
+//                        label = "verticalPadding"
+//                )
+//
+//        Box(
+//                modifier =
+//                        Modifier.clip(RoundedCornerShape(24.dp))
+//                                .graphicsLayer {} // Hardware acceleration
+//                                .background(if (selected) NeonGreen else Color.Transparent)
+//                                .clickable(
+//                                        interactionSource = interactionSource,
+//                                        indication = ripple(), // Use new ripple API
+//                                        onClick = onClick
+//                                )
+//                                .padding(
+//                                        horizontal = horizontalPadding,
+//                                        vertical = verticalPadding
+//                                ),
+//                contentAlignment = Alignment.Center
+//        ) {
+//                Row(
+//                        verticalAlignment = Alignment.CenterVertically,
+//                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+//                ) {
+//                        Icon(
+//                                imageVector = item.icon,
+//                                contentDescription = item.label,
+//                                modifier = Modifier.size(22.dp),
+//                                tint = if (selected) DarkSurface else PureWhite.copy(alpha = 0.7f)
+//                        )
+//
+//                        // Animated label - only visible when selected with smooth expand/shrink
+//                        AnimatedVisibility(
+//                                visible = selected,
+//                                enter =
+//                                        expandHorizontally(
+//                                                animationSpec =
+//                                                        spring(
+//                                                                dampingRatio =
+//                                                                        Spring.DampingRatioLowBouncy,
+//                                                                stiffness = Spring.StiffnessLow
+//                                                        ),
+//                                                expandFrom = Alignment.Start
+//                                        ) +
+//                                                fadeIn(
+//                                                        animationSpec =
+//                                                                spring(
+//                                                                        dampingRatio =
+//                                                                                Spring.DampingRatioNoBouncy,
+//                                                                        stiffness =
+//                                                                                Spring.StiffnessLow
+//                                                                )
+//                                                ),
+//                                exit =
+//                                        shrinkHorizontally(
+//                                                animationSpec =
+//                                                        spring(
+//                                                                dampingRatio =
+//                                                                        Spring.DampingRatioNoBouncy,
+//                                                                stiffness = Spring.StiffnessLow
+//                                                        ),
+//                                                shrinkTowards = Alignment.Start
+//                                        ) +
+//                                                fadeOut(
+//                                                        animationSpec =
+//                                                                spring(
+//                                                                        dampingRatio =
+//                                                                                Spring.DampingRatioNoBouncy,
+//                                                                        stiffness =
+//                                                                                Spring.StiffnessLow
+//                                                                )
+//                                                )
+//                        ) {
+//                                Text(
+//                                        text = item.label,
+//                                        style = MaterialTheme.typography.labelLarge,
+//                                        color = DarkSurface,
+//                                        maxLines = 1
+//                                )
+//                        }
+//                }
+//        }
+//}
+
 @Composable
-private fun ExpressiveNavItem(item: BottomNavItem, selected: Boolean, onClick: () -> Unit) {
-        val interactionSource = remember { MutableInteractionSource() }
+private fun ExpressiveNavItem(
+    item: BottomNavItem,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
 
-        // Animate padding for smooth size transition
-        val horizontalPadding by
-                animateDpAsState(
-                        targetValue = if (selected) 16.dp else 12.dp,
-                        animationSpec =
-                                spring(
-                                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                                        stiffness = Spring.StiffnessVeryLow
-                                ),
-                        label = "horizontalPadding"
-                )
+    val targetWidth = if (selected) 120.dp else 48.dp
 
-        val verticalPadding by
-                animateDpAsState(
-                        targetValue = if (selected) 10.dp else 10.dp,
-                        animationSpec =
-                                spring(
-                                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                                        stiffness = Spring.StiffnessVeryLow
-                                ),
-                        label = "verticalPadding"
-                )
+    val width by animateDpAsState(
+        targetValue = targetWidth,
+        animationSpec = tween(
+            durationMillis = 220,
+            easing = FastOutSlowInEasing
+        ),
+        label = "itemWidth"
+    )
 
-        Box(
-                modifier =
-                        Modifier.clip(RoundedCornerShape(24.dp))
-                                .graphicsLayer {} // Hardware acceleration
-                                .background(if (selected) NeonGreen else Color.Transparent)
-                                .clickable(
-                                        interactionSource = interactionSource,
-                                        indication = null,
-                                        onClick = onClick
-                                )
-                                .padding(
-                                        horizontal = horizontalPadding,
-                                        vertical = verticalPadding
-                                ),
-                contentAlignment = Alignment.Center
+    val bgColor by animateColorAsState(
+        targetValue = if (selected) NeonGreen else Color.Transparent,
+        animationSpec = tween(220),
+        label = "bgColor"
+    )
+
+    val labelAlpha by animateFloatAsState(
+        targetValue = if (selected) 1f else 0f,
+        animationSpec = tween(160),
+        label = "labelAlpha"
+    )
+
+    Box(
+        modifier = Modifier
+            .height(44.dp)
+            .width(width)
+            .clip(RoundedCornerShape(24.dp))
+            .background(bgColor)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(bounded = true),
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
-                Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                        Icon(
-                                imageVector = item.icon,
-                                contentDescription = item.label,
-                                modifier = Modifier.size(22.dp),
-                                tint = if (selected) DarkSurface else PureWhite.copy(alpha = 0.7f)
-                        )
+            Icon(
+                imageVector = item.icon,
+                contentDescription = item.label,
+                modifier = Modifier.size(22.dp),
+                tint = if (selected) DarkSurface else PureWhite.copy(alpha = 0.7f)
+            )
 
-                        // Animated label - only visible when selected with smooth expand/shrink
-                        AnimatedVisibility(
-                                visible = selected,
-                                enter =
-                                        expandHorizontally(
-                                                animationSpec =
-                                                        spring(
-                                                                dampingRatio =
-                                                                        Spring.DampingRatioMediumBouncy,
-                                                                stiffness = Spring.StiffnessVeryLow
-                                                        ),
-                                                expandFrom = Alignment.Start
-                                        ) +
-                                                fadeIn(
-                                                        animationSpec =
-                                                                spring(
-                                                                        dampingRatio =
-                                                                                Spring.DampingRatioNoBouncy,
-                                                                        stiffness =
-                                                                                Spring.StiffnessVeryLow
-                                                                )
-                                                ),
-                                exit =
-                                        shrinkHorizontally(
-                                                animationSpec =
-                                                        spring(
-                                                                dampingRatio =
-                                                                        Spring.DampingRatioNoBouncy,
-                                                                stiffness =
-                                                                        Spring.StiffnessMediumLow
-                                                        ),
-                                                shrinkTowards = Alignment.Start
-                                        ) +
-                                                fadeOut(
-                                                        animationSpec =
-                                                                spring(
-                                                                        dampingRatio =
-                                                                                Spring.DampingRatioNoBouncy,
-                                                                        stiffness =
-                                                                                Spring.StiffnessMediumLow
-                                                                )
-                                                )
-                        ) {
-                                Text(
-                                        text = item.label,
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = DarkSurface
-                                )
-                        }
-                }
+            if (selected) {
+                Spacer(Modifier.width(8.dp))
+
+                Text(
+                    text = item.label,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = DarkSurface,
+                    maxLines = 1,
+                    modifier = Modifier.alpha(labelAlpha)
+                )
+            }
         }
+    }
 }
+

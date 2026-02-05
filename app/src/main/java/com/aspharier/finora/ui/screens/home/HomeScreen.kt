@@ -279,9 +279,9 @@ private fun RecentExpensesSection(expenses: List<Expense>) {
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                         )
-                        TextButton(onClick = { /* TODO: View All */}) {
-                                Text("See All", color = NeonGreen)
-                        }
+//                        TextButton(onClick = { /* TODO: View All */}) {
+//                                Text("See All", color = NeonGreen)
+//                        }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))

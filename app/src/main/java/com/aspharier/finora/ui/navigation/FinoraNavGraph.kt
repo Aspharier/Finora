@@ -13,7 +13,7 @@ import com.aspharier.finora.ui.screens.expense.AddExpenseScreen
 import com.aspharier.finora.ui.screens.home.HomeScreen
 import com.aspharier.finora.ui.screens.statistics.StatisticsScreen
 
-private const val ANIMATION_DURATION = 350
+private const val ANIMATION_DURATION = 250
 
 @Composable
 fun FinoraNavGraph(

@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -90,7 +91,7 @@ private fun ExpressiveNavItem(item: BottomNavItem, selected: Boolean, onClick: (
                         animationSpec =
                                 spring(
                                         dampingRatio = Spring.DampingRatioMediumBouncy,
-                                        stiffness = Spring.StiffnessLow
+                                        stiffness = Spring.StiffnessVeryLow
                                 ),
                         label = "horizontalPadding"
                 )
@@ -101,7 +102,7 @@ private fun ExpressiveNavItem(item: BottomNavItem, selected: Boolean, onClick: (
                         animationSpec =
                                 spring(
                                         dampingRatio = Spring.DampingRatioMediumBouncy,
-                                        stiffness = Spring.StiffnessLow
+                                        stiffness = Spring.StiffnessVeryLow
                                 ),
                         label = "verticalPadding"
                 )
@@ -109,6 +110,7 @@ private fun ExpressiveNavItem(item: BottomNavItem, selected: Boolean, onClick: (
         Box(
                 modifier =
                         Modifier.clip(RoundedCornerShape(24.dp))
+                                .graphicsLayer {} // Hardware acceleration
                                 .background(if (selected) NeonGreen else Color.Transparent)
                                 .clickable(
                                         interactionSource = interactionSource,
@@ -141,7 +143,7 @@ private fun ExpressiveNavItem(item: BottomNavItem, selected: Boolean, onClick: (
                                                         spring(
                                                                 dampingRatio =
                                                                         Spring.DampingRatioMediumBouncy,
-                                                                stiffness = Spring.StiffnessMedium
+                                                                stiffness = Spring.StiffnessVeryLow
                                                         ),
                                                 expandFrom = Alignment.Start
                                         ) +
@@ -151,7 +153,7 @@ private fun ExpressiveNavItem(item: BottomNavItem, selected: Boolean, onClick: (
                                                                         dampingRatio =
                                                                                 Spring.DampingRatioNoBouncy,
                                                                         stiffness =
-                                                                                Spring.StiffnessMedium
+                                                                                Spring.StiffnessVeryLow
                                                                 )
                                                 ),
                                 exit =
@@ -160,7 +162,8 @@ private fun ExpressiveNavItem(item: BottomNavItem, selected: Boolean, onClick: (
                                                         spring(
                                                                 dampingRatio =
                                                                         Spring.DampingRatioNoBouncy,
-                                                                stiffness = Spring.StiffnessHigh
+                                                                stiffness =
+                                                                        Spring.StiffnessMediumLow
                                                         ),
                                                 shrinkTowards = Alignment.Start
                                         ) +
@@ -170,7 +173,7 @@ private fun ExpressiveNavItem(item: BottomNavItem, selected: Boolean, onClick: (
                                                                         dampingRatio =
                                                                                 Spring.DampingRatioNoBouncy,
                                                                         stiffness =
-                                                                                Spring.StiffnessHigh
+                                                                                Spring.StiffnessMediumLow
                                                                 )
                                                 )
                         ) {

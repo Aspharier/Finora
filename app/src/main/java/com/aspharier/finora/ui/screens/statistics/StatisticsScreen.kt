@@ -26,7 +26,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aspharier.finora.domain.model.Category
 import com.aspharier.finora.domain.model.CategorySummary
@@ -36,16 +35,12 @@ import com.aspharier.finora.ui.theme.NeonGreen
 fun StatisticsScreen(viewModel: StatisticsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text(
-            text = "Statistics",
-            style = MaterialTheme.typography.displayMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
+                text = "Statistics",
+                style = MaterialTheme.typography.displayMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
         )
 
         TimeRangeSelector(state.selectedRange, viewModel::onTimeRangeSelected)
@@ -62,15 +57,13 @@ fun StatisticsScreen(viewModel: StatisticsViewModel = hiltViewModel()) {
             BarChart(state.chartData)
         } else {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                contentAlignment = Alignment.Center
+                    modifier = Modifier.fillMaxWidth().height(200.dp),
+                    contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No data available",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = "No data available",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -79,19 +72,15 @@ fun StatisticsScreen(viewModel: StatisticsViewModel = hiltViewModel()) {
 
         // Category Breakdown
         Text(
-            text = "Category Breakdown",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.SemiBold
+                text = "Category Breakdown",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(state.categoryBreakdown) { summary ->
-                CategoryBreakdownItem(summary)
-            }
+
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            items(state.categoryBreakdown) { summary -> CategoryBreakdownItem(summary) }
         }
     }
 }
@@ -100,49 +89,50 @@ fun StatisticsScreen(viewModel: StatisticsViewModel = hiltViewModel()) {
 private fun TotalAmountHeader(state: StatisticsState) {
     Column {
         Text(
-            text = "Total Spent",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = "Total Spent",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         AnimatedContent(
-            targetState = state.totalSpent,
-            transitionSpec = { fadeIn(tween(300)) togetherWith fadeOut(tween(300)) },
-            label = "amountChange"
+                targetState = state.totalSpent,
+                transitionSpec = { fadeIn(tween(300)) togetherWith fadeOut(tween(300)) },
+                label = "amountChange"
         ) { amount ->
             Text(
-                text = "₹ ${String.format("%.2f", amount)}",
-                style = MaterialTheme.typography.displayLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Bold
+                    text = "₹ ${String.format("%.2f", amount)}",
+                    style = MaterialTheme.typography.displayLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Bold
             )
         }
-        
+
         if (state.budgetStatus != null) {
             val budget = state.budgetStatus
             Spacer(modifier = Modifier.height(4.dp))
             LinearProgressIndicator(
-                progress = { budget.percentageUsed / 100f },
-                modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
-                color = when {
-                    budget.percentageUsed > 100 -> MaterialTheme.colorScheme.error
-                    budget.percentageUsed > 80 -> Color(0xFFFFB74D) // Warning Orange
-                    else -> NeonGreen
-                },
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    progress = { budget.percentageUsed / 100f },
+                    modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
+                    color =
+                            when {
+                                budget.percentageUsed > 100 -> MaterialTheme.colorScheme.error
+                                budget.percentageUsed > 80 -> Color(0xFFFFB74D) // Warning Orange
+                                else -> NeonGreen
+                            },
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "${String.format("%.1f", budget.percentageUsed)}% of Budget",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = "${String.format("%.1f", budget.percentageUsed)}% of Budget",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "₹ ${String.format("%.2f", budget.remaining)} remaining",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = "₹ ${String.format("%.2f", budget.remaining)} remaining",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -151,31 +141,30 @@ private fun TotalAmountHeader(state: StatisticsState) {
 
 @Composable
 private fun TimeRangeSelector(selected: TimeRange, onSelect: (TimeRange) -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         TimeRange.entries.forEach { range ->
             val isSelected = selected == range
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 4.dp)
-                    .height(40.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(if (isSelected) NeonGreen else Color.Transparent)
-                    .border(
-                        width = 1.dp,
-                        color = if (isSelected) Color.Transparent else MaterialTheme.colorScheme.outline,
-                        shape = RoundedCornerShape(20.dp)
-                    )
-                    .clickable { onSelect(range) },
-                contentAlignment = Alignment.Center
+                    modifier =
+                            Modifier.weight(1f)
+                                    .padding(horizontal = 4.dp)
+                                    .height(40.dp)
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(if (isSelected) NeonGreen else Color.Transparent)
+                                    .border(
+                                            width = 1.dp,
+                                            color =
+                                                    if (isSelected) Color.Transparent
+                                                    else MaterialTheme.colorScheme.outline,
+                                            shape = RoundedCornerShape(20.dp)
+                                    )
+                                    .clickable { onSelect(range) },
+                    contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = range.label,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = if (isSelected) Color.Black else MaterialTheme.colorScheme.onSurface
+                        text = range.label,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = if (isSelected) Color.Black else MaterialTheme.colorScheme.onSurface
                 )
             }
         }
@@ -184,42 +173,51 @@ private fun TimeRangeSelector(selected: TimeRange, onSelect: (TimeRange) -> Unit
 
 @Composable
 private fun BarChart(data: List<Pair<String, Double>>) {
-    val max = data.maxOfOrNull { it.second } ?: 1.0
-    
+    val max = data.maxOfOrNull { it.second }?.takeIf { it > 0 } ?: 1.0
+
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.Bottom
+            modifier = Modifier.fillMaxWidth().height(200.dp),
+            horizontalArrangement =
+                    if (data.size < 7) Arrangement.SpaceEvenly else Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Bottom
     ) {
         data.forEach { (label, value) ->
-            val animatedHeight by animateFloatAsState(
-                targetValue = (value / max).toFloat().coerceIn(0.05f, 1f),
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessLow
-                ),
-                label = "barHeight"
-            )
-            
+            val animatedHeight by
+                    animateFloatAsState(
+                            targetValue = (value / max).toFloat().coerceIn(0.05f, 1f),
+                            animationSpec =
+                                    spring(
+                                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                                            stiffness = Spring.StiffnessLow
+                                    ),
+                            label = "barHeight"
+                    )
+
             Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    modifier =
+                            Modifier.width(40.dp) // Fixed width for better look
+                                    .fillMaxHeight(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Bottom
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .fillMaxHeight(animatedHeight)
-                        .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
-                        .background(NeonGreen)
-                )
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        contentAlignment = Alignment.BottomCenter
+                ) {
+                    Box(
+                            modifier =
+                                    Modifier.fillMaxWidth()
+                                            .fillMaxHeight(animatedHeight)
+                                            .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                                            .background(NeonGreen)
+                    )
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall,
-                    maxLines = 1,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = label,
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -229,45 +227,50 @@ private fun BarChart(data: List<Pair<String, Double>>) {
 @Composable
 private fun CategoryBreakdownItem(summary: CategorySummary) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-            .padding(12.dp)
+            verticalAlignment = Alignment.CenterVertically,
+            modifier =
+                    Modifier.fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .padding(12.dp)
     ) {
         Icon(
-            imageVector = Category.getIconForName(summary.category.iconName),
-            contentDescription = null,
-            tint = Color(android.graphics.Color.parseColor(summary.category.colorHex)),
-            modifier = Modifier
-                .size(40.dp)
-                .background(
-                    Color(android.graphics.Color.parseColor(summary.category.colorHex)).copy(alpha = 0.2f),
-                    CircleShape
-                )
-                .padding(8.dp)
+                imageVector = Category.getIconForName(summary.category.iconName),
+                contentDescription = null,
+                tint = Color(android.graphics.Color.parseColor(summary.category.colorHex)),
+                modifier =
+                        Modifier.size(40.dp)
+                                .background(
+                                        Color(
+                                                        android.graphics.Color.parseColor(
+                                                                summary.category.colorHex
+                                                        )
+                                                )
+                                                .copy(alpha = 0.2f),
+                                        CircleShape
+                                )
+                                .padding(8.dp)
         )
-        
+
         Spacer(modifier = Modifier.width(12.dp))
-        
+
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = summary.category.name,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                    text = summary.category.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = "${String.format("%.1f", summary.percentage)}%",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "${String.format("%.1f", summary.percentage)}%",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        
+
         Text(
-            text = "₹ ${String.format("%.2f", summary.amount)}",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
+                text = "₹ ${String.format("%.2f", summary.amount)}",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
         )
     }
 }

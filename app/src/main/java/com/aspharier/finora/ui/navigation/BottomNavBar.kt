@@ -55,7 +55,7 @@ fun FinoraBottomBar(navController: NavController) {
                 Row(
                         modifier =
                                 Modifier.clip(RoundedCornerShape(32.dp))
-                                        .background(DarkSurface.copy(alpha = 0.85f))
+                                        .background(DarkSurface)
                                         .padding(horizontal = 8.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically

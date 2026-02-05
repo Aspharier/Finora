@@ -2,22 +2,26 @@ package com.aspharier.finora.ui.screens.statistics
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aspharier.finora.domain.repository.ExpenseRepository
 import com.aspharier.finora.domain.usecase.GetBudgetStatusUseCase
 import com.aspharier.finora.domain.usecase.GetExpenseStatsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.temporal.TemporalAdjusters
-import javax.inject.Inject
 
 @HiltViewModel
-class StatisticsViewModel @Inject constructor(
-    private val getExpenseStatsUseCase: GetExpenseStatsUseCase,
-    private val getBudgetStatusUseCase: GetBudgetStatusUseCase
+class StatisticsViewModel
+@Inject
+constructor(
+        private val getExpenseStatsUseCase: GetExpenseStatsUseCase,
+        private val getBudgetStatusUseCase: GetBudgetStatusUseCase,
+        private val expenseRepository: ExpenseRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(StatisticsState())
@@ -26,6 +30,14 @@ class StatisticsViewModel @Inject constructor(
     init {
         loadData()
         observeBudget()
+        observeExpenses()
+    }
+
+    private fun observeExpenses() {
+        viewModelScope.launch {
+            // Trigger reload whenever expenses change
+            expenseRepository.getRecentExpenses(1).collect { loadData() }
+        }
     }
 
     private fun observeBudget() {
@@ -44,22 +56,22 @@ class StatisticsViewModel @Inject constructor(
     private fun loadData() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            
+
             val (start, end) = getDateRange(_state.value.selectedRange)
-            
+
             val totalSpent = getExpenseStatsUseCase.getTotalSpent(start, end)
             val dailyAverage = getExpenseStatsUseCase.getDailyAverage(start, end)
             val breakdown = getExpenseStatsUseCase.getCategoryBreakdown(start, end)
             val chartData = getExpenseStatsUseCase.getChartData(start, end)
-            
-            _state.update { 
+
+            _state.update {
                 it.copy(
-                    isLoading = false,
-                    totalSpent = totalSpent,
-                    dailyAverage = dailyAverage,
-                    categoryBreakdown = breakdown,
-                    chartData = chartData
-                ) 
+                        isLoading = false,
+                        totalSpent = totalSpent,
+                        dailyAverage = dailyAverage,
+                        categoryBreakdown = breakdown,
+                        chartData = chartData
+                )
             }
         }
     }

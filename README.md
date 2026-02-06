@@ -48,7 +48,6 @@ Think of it as your **digital finance companion** to stay on top of your money.
 - **Hilt** (Dependency Injection)
 - **Coroutines**
 - **MVVM Architecture**
-- Optionally **Charts Library** (for graphs)
 
 ---
 

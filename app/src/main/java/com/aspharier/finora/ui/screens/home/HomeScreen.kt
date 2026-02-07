@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -64,7 +65,8 @@ fun HomeScreen(
                                         MonthlyBudgetCard(
                                                 budget = state.budgetStatus,
                                                 dailyAverage = state.dailyAverage,
-                                                onSetBudgetClick = { showBudgetDialog = true }
+                                                onSetBudgetClick = { showBudgetDialog = true },
+                                                onResetBudgetClick = { viewModel.resetBudget() }
                                         )
                                 }
 
@@ -117,7 +119,8 @@ private fun HomeTopBar(onToggleTheme: () -> Unit, isDarkTheme: Boolean) {
 private fun MonthlyBudgetCard(
         budget: MonthlyBudget?,
         dailyAverage: Double,
-        onSetBudgetClick: () -> Unit
+        onSetBudgetClick: () -> Unit,
+        onResetBudgetClick: () -> Unit
 ) {
         Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -129,11 +132,26 @@ private fun MonthlyBudgetCard(
                 shape = RoundedCornerShape(24.dp)
         ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-                        Text(
-                                text = "Monthly Budget",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                        ) {
+                                Text(
+                                        text = "Monthly Budget",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                if (budget != null) {
+                                        IconButton(onClick = onResetBudgetClick) {
+                                                Icon(
+                                                        imageVector = Icons.Default.Delete,
+                                                        contentDescription = "Reset Budget",
+                                                        tint = MaterialTheme.colorScheme.error
+                                                )
+                                        }
+                                }
+                        }
 
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -279,9 +297,9 @@ private fun RecentExpensesSection(expenses: List<Expense>) {
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                         )
-//                        TextButton(onClick = { /* TODO: View All */}) {
-//                                Text("See All", color = NeonGreen)
-//                        }
+                        //                        TextButton(onClick = { /* TODO: View All */}) {
+                        //                                Text("See All", color = NeonGreen)
+                        //                        }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))

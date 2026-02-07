@@ -40,6 +40,15 @@ constructor(
         }
     }
 
+    fun resetBudget() {
+        viewModelScope.launch {
+            val currentMonth = java.time.YearMonth.now().toString()
+            budgetRepository.deleteBudget(currentMonth)
+            expenseRepository.deleteExpensesForMonth(currentMonth)
+            loadData()
+        }
+    }
+
     private fun loadData() {
         viewModelScope.launch {
             val startOfMonth = LocalDate.now().withDayOfMonth(1)
